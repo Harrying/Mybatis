@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.mappers.One2MoreMapper">
+	
+	<resultMap type="Course" id="CourseMap">
+		<id column="course_id" property="courseId" /> 
+		<result column="name" property="name" /> 
+		<result column="description" property="description" /> 
+		<result column="start_date" property="startDate" /> 
+		<result column="end_date" property="endDate" /> 
+	</resultMap>
+	
+	<!-- 根据id获取课程信息
+		resultType="Course"则要保证  查询的列 和 类的属性 一一对应，才能映射成功
+	 -->
+	<select id="findCourseById" parameterType="int" resultMap="CourseMap">
+	   select * 
+	   from courses 
+	   where course_id=#{id} 
+	</select>
+	
+	<select id="findAddressById" parameterType="int" resultType="Address">
+		select addr_id as addrId,street,city,state,zip,country
+		from addresses
+		where addr_id=#{id}
+	</select>
+	
+	<resultMap type="Address" id="AddressMap">
+		<id column="addr_id" property="addrId"></id>
+		<result column="street" property="street"/>
+		<result column="city" property="city"/>
+		<result column="zip" property="zip"/>
+		<result column="state" property="state"/>
+		<result column="country" property="country"/>
+	</resultMap>
+	
+	<!-- 嵌套结果映射 实现 一对一 一对多 -->
+	<resultMap type="Tutor" id="TutorMap">
+		<id column="tutor_id" property="tutorId" /> 
+		<result column="tname" property="name" /> 
+		<result column="email" property="email" /> 
+		<result column="phone" property="phone" />
+		
+		<!-- <result column="addr_id" property="address"/> -->
+		<association property="address" resultMap="AddressMap"></association>
+		<!-- collection 一对多 嵌套结果映射 -->
+		<collection property="courses" resultMap="CourseMap"></collection>
+	</resultMap>
+	
+	<!-- 获取讲师的信息【包含课程】 -->
+	<select id="findTutorByIdWithCourses" parameterType="int" resultMap="TutorMap">
+		select t.tutor_id,t.name tname,t.email,t.phone,
+			a.addr_id,a.street,a.city,a.state,a.zip,a.country,
+			c.course_id,c.name,c.description,c.start_date,c.end_date
+		from courses c,tutors t,addresses a
+		where c.tutor_id=t.tutor_id
+			and t.addr_id=a.addr_id
+			and t.tutor_id=#{id}
+	</select>
+	
+	<!-- 根据讲师编号 获取 课程的信息 -->
+	<select id="selectCourseByTutorId" parameterType="int" resultMap="CourseMap">
+		select *
+		from courses
+		where tutor_id=#{id}
+	</select>
+	
+	<!-- 嵌套结果查询 一对一  一对多 -->
+	<resultMap type="Tutor" id="TutorMap2">
+		<id column="tutor_id" property="tutorId" /> 
+		<result column="tname" property="name" /> 
+		<result column="email" property="email" /> 
+		<result column="phone" property="phone" />
+		
+		<!-- 嵌套结果查询 与 是否在接口中定义抽象方法无关，只和映射文件中对应的sql语句有关 -->
+		<association property="address" select="findAddressById" column="addr_id"></association>
+		<collection property="courses" select="selectCourseByTutorId" column="tutor_id"></collection>
+	</resultMap>
+	
+	<select id="findAllTutorsWithCourses" resultMap="TutorMap2"> 
+		<!-- 查询  单张表 -->
+		select * 
+		from tutors
+	</select>
+	
+	<!-- 删除指定id的老师【如果有课程 依赖 这个老师，则 课程老师设置为null】 -->
+	<delete id="deleteTutorById_setNull" parameterType="int">
+		delete from tutors
+		where tutor_id=#{id}
+	</delete>
+	
+	<update id="updateCourseSetTutorIdNull" parameterType="int">
+		update courses
+		set tutor_id=null
+		where tutor_id=#{id}
+	</update>
+	
+	
+</mapper>
+
+
+
+
+
+

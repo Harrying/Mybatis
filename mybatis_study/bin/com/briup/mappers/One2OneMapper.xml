@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.mappers.One2OneMapper">
+
+	<!-- 根据地址编号 查询地址表中地址信息，封装成一个对象 -->
+	<select id="findAddressById" parameterType="int" resultType="Address">
+		select addr_id as addrId,street,city,state,zip,country
+		from addresses
+		where addr_id=#{id}
+	</select>
+	
+	<!-- 自定义Address类型的结果映射 -->
+	<!-- type: 往什么类型对象中放入数据   id: 标识resultMap  -->
+	<resultMap type="Address" id="AddressMap">
+		<!-- id标签映射 主键值 -->
+		<id column="addr_id" property="addrId"></id>
+		
+		<!-- result映射普通列 -->
+		<result column="street" property="street"/>
+		<result column="city" property="city"/>
+		<result column="zip" property="zip"/>
+		<result column="state" property="state"/>
+		<result column="country" property="country"/>
+	</resultMap>
+	
+	<select id="findAllAddresses" resultMap="AddressMap">
+		select *
+		from addresses
+	</select>
+	
+	<resultMap type="Student" id="StudentMap">
+		<id column="stud_id" property="studId"/>
+		<result column="name" property="name"/>
+		<result column="email" property="email"/>
+		<result column="dob" property="dob"/>
+		<result column="phone" property="phone"/>
+		
+		<!-- 最笨的方法，将多个列 映射到一个 对象中 -->
+		<result column="addr_id" property="address.addrId"/>
+		<result column="street" property="address.street"/>
+		<result column="city" property="address.city"/>
+		<result column="state" property="address.state"/>
+		<result column="zip" property="address.zip"/>
+		<result column="country" property="address.country"/>
+	</resultMap>
+	
+	<!-- 根据学生编号查询数据库 映射得到 一个完整的学生对象 -->
+	<select id="findStudentById" parameterType="int" resultMap="StudentMap">
+		select s.stud_id,s.name,s.email,s.phone,s.dob,
+			a.addr_id,a.street,a.city,a.state,a.zip,a.country
+		from students s, addresses a
+		where s.addr_id=a.addr_id
+			and s.stud_id=#{sid}
+	</select>
+	
+	<!-- 1.嵌套结果映射 -->
+	<resultMap type="Student" id="StudentMap2">
+		<id column="stud_id" property="studId"/>
+		<result column="name" property="name"/>
+		<result column="email" property="email"/>
+		<result column="dob" property="dob"/>
+		<result column="phone" property="phone"/>
+		
+		<!-- 借助另一个ResultMap实现 多个列 到 addr对象的映射 -->
+		<association resultMap="AddressMap" property="address"/>
+	</resultMap>
+	
+	<!-- 查询所有学生【包含地址】 -->
+	<select id="findAllStudents" resultMap="StudentMap2">
+		select s.stud_id,s.name,s.email,s.phone,s.dob,
+			a.addr_id,a.street,a.city,a.state,a.zip,a.country
+		from students s, addresses a
+		where s.addr_id=a.addr_id
+	</select>
+
+	<!-- 2.嵌套结果查询 -->
+	<resultMap type="Student" id="StudentMap3">
+		<id column="stud_id" property="studId"/>
+		<result column="name" property="name"/>
+		<result column="email" property="email"/>
+		<result column="dob" property="dob"/>
+		<result column="phone" property="phone"/>
+		<!-- addr_id -->
+		
+		<!-- 嵌套结果查询: 在resultMap中嵌套另一个select查询，结果进行映射 -->
+		<association property="address" select="findAddressById" column="addr_id"></association>
+	</resultMap>
+	
+	<!-- 根据学生id获取学生基本信息，注意，只查询students表 -->
+	<select id="findStudentByIdWithoutAddress" parameterType="int" resultMap="StudentMap3">
+		select * 
+		from students
+		where stud_id=#{id}
+	</select>
+	
+	<!-- 将地址对象 插入数据库 -->
+	<insert id="insertAddress" parameterType="Address">
+		insert into addresses(addr_id,street,city,state,zip,country)
+		values(#{addrId},#{street},#{city},#{state},#{zip},#{country})
+	</insert>
+	
+	<!-- 将学生对象 插入数据库 -->
+	<insert id="insertStudentWithAddress" parameterType="Student">
+		insert into students(stud_id,name,email,dob,phone,addr_id)
+		values(#{studId},#{name},#{email},#{dob},#{phone},#{address.addrId})
+	</insert>
+	
+</mapper>
+
+
+
+
+
+

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- com.briup.mappers.StudentMapper是我们定义接口的全限定名字 这样就可以使用接口调用映射的SQL语句了 这个名字一定要和接口对应上-->
+<mapper namespace="com.briup.mappers.StudentMapper">
+
+	<resultMap type="Student" id="StudentResult">
+		<id property="studId" column="stud_id" />
+		<result property="name" column="name" />
+		<result property="email" column="email" />
+		<result property="dob" column="dob" />
+	</resultMap>
+
+	<!-- 关于select返回的类型，只考虑查询得到的行即可 -->
+	<select id="findAllStudents" resultType="Student">
+		SELECT * FROM STUDENTS
+	</select>
+
+	<!-- 列名和属性名字不一致可以给查询的列起一个别名 -->
+	<!-- 如果返回类型为类类型，则一定要保证  类里面属性和查询的列 名称要一致 -->
+	<select id="findStudentById" parameterType="int" resultType="Student">
+		SELECT STUD_ID AS STUDID,NAME,EMAIL,DOB
+		FROM STUDENTS
+		WHERE STUD_ID=#{id}
+	</select>
+	
+	<!-- 查询一个学生信息，映射到map中 -->
+	<select id="findStudentById_Map" parameterType="int" resultType="map">
+		SELECT STUD_ID AS STUDID,NAME,EMAIL,DOB
+		FROM STUDENTS
+		WHERE STUD_ID=#{id}
+	</select>
+	
+	<select id="findAllStudent_Map" resultType="map">
+		SELECT STUD_ID,NAME,EMAIL,DOB
+		FROM STUDENTS
+	</select>
+	
+	<insert id="insertStudent2" parameterType="Student"> 
+		INSERT INTO
+		STUDENTS(STUD_ID,NAME,EMAIL,DOB) 
+		VALUES(#{studId},#{name},#{email},#{dob}) 
+	</insert>
+	
+	<!-- 添加update语句 -->
+	<update id="updateStudent" parameterType="Student">
+		update students
+		set name=#{name},email=#{email},dob=#{dob}
+		where stud_id=#{studId}
+	</update>
+	
+	<delete id="deleteStudent" parameterType="int">
+		delete from students
+		where stud_id=#{id}
+	</delete>
+	
+	<!-- 获取数据库中学生的个数 -->
+	<select id="getStudentSize" resultType="int">
+		select count(*)
+		from students
+	</select>
+	
+	<!-- 获取id=3的那个学生的姓名 -->
+	<select id="getNameById" parameterType="int" resultType="String">
+		select name
+		from students
+		where stud_id=#{id}
+	</select>
+	
+	<!-- 获取所有学生的姓名 -->
+	<select id="getAllNames" resultType="String">
+		select name
+		from students
+	</select>
+	
+</mapper>
+
+
+
+
+

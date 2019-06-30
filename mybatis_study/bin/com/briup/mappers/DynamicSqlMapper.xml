@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- com.briup.mappers.StudentMapper是我们定义接口的全限定名字 这样就可以使用接口调用映射的SQL语句了 这个名字一定要和接口对应上-->
+
+<mapper namespace="com.briup.mappers.DynamicSqlMapper">
+	
+	<!-- 按照if条件 动态查找信息 -->
+	<resultMap type="Course" id="CourseResult"> 
+		<id column="course_id" property="courseId" /> 
+		<result column="name" property="name" /> 
+		<result column="description" property="description" /> 
+		<result column="start_date" property="startDate" /> 
+		<result column="end_date" property="endDate" /> 
+	</resultMap> 
+
+	<!-- if判断 -->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult">
+		SELECT * FROM COURSES 
+		WHERE TUTOR_ID=#{tutorId} 
+		<if test="courseName != null"> 
+			AND NAME LIKE #{courseName} 
+		</if>
+		<if test="startDate != null"> 
+			AND START_DATE >= #{startDate} 
+		</if> 
+		<if test="endDate != null"> 
+			AND END_DATE <![CDATA[ <= ]]> #{endDate} 
+		</if> 
+	</select> -->
+	
+	<!-- 
+		按照choose进行条件筛选，类似if...else if...else if...else
+		其中choose、when、otherwise标签都是固定格式
+		重点注意【searchBy标签】，这是核心筛选条件 
+	-->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult"> 
+		SELECT * FROM COURSES 
+		<choose> 
+			<when test="searchBy == 'Tutor'"> 
+				WHERE TUTOR_ID= #{tutorId} 
+			</when> 
+			<when test="searchBy == 'CourseName'"> 
+				WHERE name like #{courseName} 
+			</when> 
+			<otherwise> 
+				WHERE start_date >= sysdate 
+			</otherwise> 
+		</choose> 
+	</select> -->
+	
+	<!-- where子句，where不存在也可以 -->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult"> 
+		SELECT * FROM COURSES 
+		<where>  
+			<if test="tutorId != null "> 
+				TUTOR_ID= #{tutorId} 
+			</if> 
+			<if test="courseName != null"> 
+				AND name like #{courseName} 
+			</if> 
+			<if test="startDate != null"> 
+				AND start_date >= #{startDate} 
+			</if> 
+			<if test="endDate != null"> 
+				AND end_date <![CDATA[ <= ]]> #{endDate} 
+			</if> 
+		</where> 
+	</select>  -->
+	
+	<!-- trim测试 -->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult"> 
+		SELECT * FROM COURSES 
+		<trim prefix="WHERE" suffixOverrides="or | and"> 
+			<if test="tutorId != null">
+				TUTOR_ID= #{tutorId} and
+			</if> 
+			<if test="courseName != null"> 
+				name like #{courseName} and
+			</if> 
+		</trim> 
+	</select> -->
+	
+	<!-- foreach标签 -->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult"> 
+		SELECT * FROM COURSES 
+		<if test="tutorIds != null"> 
+			<where> 
+				【注意】此处collection为一个集合
+				<foreach item="Id" collection="tutorIds"> 
+					OR tutor_id=#{Id} 
+				</foreach> 
+			</where>  
+		</if>  
+	</select> -->
+	
+	<!-- foreach 中生成 in字段 -->
+	<!-- <select id="searchCourses" parameterType="map" resultMap="CourseResult"> 
+		SELECT * FROM COURSES 
+		<if test="tutorIds != null"> 
+			<where> 
+				tutor_id IN
+				<foreach item="tempValue" collection="tutorIds" open="(" separator="," close=")"> 
+					#{tempValue} 
+				</foreach> 
+			</where> 
+		</if> 
+	</select> -->
+	
+	<!-- set条件设置 -->
+	<!-- <update id="updateCourse" parameterType="Course"> 
+		update courses
+		<set>
+			<if test="name != null">name=#{name},</if> 
+			<if test="description != null">description=#{description},</if> 
+			<if test="startDate != null">start_date=#{startDate},</if> 
+			<if test="endDate != null">end_date=#{endDate},</if> 
+		</set> 
+		where course_id=#{courseId} 
+	</update> -->
+	
+	
+</mapper>

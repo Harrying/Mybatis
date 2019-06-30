@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 使用注解时，namespace值绝对不可以和 映射接口全包名一致，会出现冲突 -->
+<mapper namespace="com.briup.mybatis">
+	
+	<resultMap type="Person" id="PersonResult">
+		<id property="id" column="pid"/>
+		<result property="name" column="name"/>
+		<result property="age" column="age"/>
+	</resultMap>
+	
+</mapper>

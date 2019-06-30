@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<!-- 必须是第一个子标签 -->
+	<!--      resource属性用来引入配置文件，配置文件优先级更高 -->
+	<properties resource="jdbc.properties">
+		<!-- 声明变量 ${变量名} -->
+		<property name="jdbc.user" value="briup2"/>
+		<property name="jdbc.password" value="briup2"/>
+	</properties>
+
+	<!-- 全局变量设置，一般采用默认设置即可 -->
+	<!-- <settings>
+		<setting name="logPrefix" value="log4j: "/>
+	</settings> -->
+
+	<!-- 定义类型的别名 -->
+	<typeAliases>
+		<!-- 
+			<typeAlias type="com.briup.pojo.Student" alias="Student" />
+			<typeAlias type="com.briup.homework.Teacher" alias="Teacher" /> 
+			<package name="com.briup.many2many"/>
+			<package name="com.briup.bean"/>
+			<package name="com.briup.special"/>
+		-->
+		<!-- 给指定包下面所有的类设置别名，别名就是类名本身 -->
+		<package name="com.briup.annotation"/>
+	</typeAliases>
+	
+	<!-- 自定义类型处理器 -->
+	<typeHandlers>
+		<typeHandler handler="com.briup.typehandlers.PhoneTypeHandler"/>
+		<!-- <typeHandler handler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="com.briup.special.Gender"/>  -->
+	</typeHandlers>
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC"></transactionManager>
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.driver}" /> 
+				<property name="url" value="${jdbc.url}" /> 
+				<property name="username" value="${jdbc.user}" />
+				<property name="password" value="${jdbc.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<!-- 配置映射文件路径 -->
+	<mappers>
+		<!-- mapper中的属性resource，默认从classpath: [src] 
+			<mapper resource="com/briup/mappers/StudentMapper.xml"/>
+			<mapper resource="com/briup/homework/TeacherMapper.xml"/>
+			<mapper url="file:///F:/%E5%B9%BF%E8%A5%BF%E7%A7%91%E6%8A%80/%E5%AE%9E%E8%AE%ADcode/mybatis_study/src/com/briup/homework/TeacherMapper.xml"/>
+			<mapper resource="com/briup/mappers/One2OneMapper.xml"/>
+			<mapper resource="com/briup/mappers/One2MoreMapper.xml"/>
+			<mapper resource="com/briup/many2many/Many2ManyMapper.xml"/>
+			<mapper resource="com/briup/mappers/DynamicSqlMapper.xml"/>
+			<mapper resource="com/briup/mappers/SpecialMapper.xml"/>
+		-->
+		
+		<!-- <mapper resource="com/briup/mappers/AnnotationMapper.xml"/> -->
+		<!-- 配置注解路径 -->
+		<mapper class="com.briup.mappers.AnnotationMapper"/>
+	</mappers>
+	
+</configuration>
+
+
+
+
+
+
+
+

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace的值，一般情况下【通过mapper对象实现功能】 都是 映射接口的全包名 -->
+<!-- namespace的值，也可以任意，前提条件: 通过session直接执行sql语句 -->
+<!-- <mapper namespace="TeacherMapper"> -->
+<mapper namespace="com.briup.homework.TeacherMapper">
+
+	<!-- 插入一个老师到表结构中 -->
+	<insert id="insertTeacher" parameterType="com.briup.homework.Teacher">
+		insert into teacher
+		values(#{tid},#{name},#{salary},#{start_date})
+	</insert>
+	
+	<insert id="insertTeacher_autoId" parameterType="Teacher">
+		insert into teacher
+		values(my_seq.nextval,#{name},#{salary},#{start_date})
+	</insert>
+	
+	<!-- 插入老师，自动生成主键 -->
+	<insert id="insertTeacher_autoId2" parameterType="Teacher">
+		<!-- 自动根据序列获取值，先给Teacher对象设置setTid，然后再通过Teacher对象添加列的值 -->
+		<selectKey resultType="int" keyProperty="tid" order="BEFORE">
+			select my_seq.nextval
+			from dual
+		</selectKey>
+	
+		insert into teacher
+		values(#{tid},#{name},#{salary},#{start_date})
+	</insert>
+	
+	<resultMap type="Teacher" id="TeacherMap">
+		<!-- 映射主键列 -->
+		<id column="id" property="tid"/>
+		
+		<!-- 映射普通列 -->
+		<result column="name" property="name"/>
+		<result column="salary" property="salary"/>
+		<result column="sdate" property="start_date"/>
+	</resultMap>
+	
+	<!-- 根据name：lucy查找所有老师 -->
+	<!-- select里面的resultMap属性，需要用户自己定义映射方式 -->
+	<select id="selectTeacherByName2" parameterType="String" resultMap="TeacherMap">
+		select *
+		from teacher
+		where name=#{name}
+	</select>
+	
+	<!-- select标签中resultType属性，必须要保证 类的属性名和列名 一致，才能映射成功 -->
+	<select id="selectTeacherByName" parameterType="String" resultType="Teacher">
+		select id as tid,name,salary,sdate as start_date
+		from teacher
+		where name=#{name}
+	</select>
+	
+	<!-- 根据Teacher的id，对数据库表中的数据进行更新 -->
+	<update id="updateTeacher" parameterType="Teacher">
+		update teacher
+		set name=#{name},addr=#{addr}
+		where id=#{tid}
+	</update>
+	
+	<select id="selectTeacherById" parameterType="int" resultType="Teacher">
+		select id as tid,name,salary,sdate as start_date,addr
+		from teacher
+		where id=#{id}
+	</select>
+	
+	<delete id="deleteTeacherById" parameterType="int">
+		delete from teacher
+		where id=#{tid}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+

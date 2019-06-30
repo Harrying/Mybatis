@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.briup.many2many.Many2ManyMapper">
+	
+	<insert id="insertStudent" parameterType="Student">
+		<!-- 自动生成主键 -->
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select my_seq.nextval
+			from dual
+		</selectKey>
+	
+		insert into student(id,name,gender,major,grade)
+		values(#{id},#{name},#{gender},#{major},#{grade})
+	</insert>
+	
+	<insert id="insertCourse" parameterType="Course">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select my_seq.nextval from dual
+		</selectKey>
+		insert into	course(id,course_code,course_name)
+		values(#{id},#{courseCode},#{courseName})
+	</insert>
+	
+	<resultMap type="Student" id="StudentMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="gender" property="gender"/>
+		<result column="major" property="major"/>
+		<result column="grade" property="grade"/>
+	</resultMap>
+	
+	<select id="getStudentById" parameterType="int" resultMap="StudentMap">
+		select id,name,gender,major,grade
+		from student
+		where id=#{id}
+	</select>
+	
+	<select id="getCourseById" parameterType="int" resultType="Course">
+		select id,course_code as courseCode,course_name as courseName
+		from course
+		where id=#{id}
+	</select>
+	
+	<!-- 学生选课：往student_course表中添加一条数据 -->
+	<insert id="studentSelectCourse">
+		insert into student_course
+		values(my_seq.nextval,#{param1.id},#{param2.id})
+	</insert>
+	
+	<resultMap type="Course" id="CourseMap">
+		<id column="cid" property="id"/>
+		<result column="course_code" property="courseCode"/>
+		<result column="course_name" property="courseName"/>
+	</resultMap>
+	
+	<!-- 常规写法 -->
+	<resultMap type="Student" id="StudentMap2">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="gender" property="gender"/>
+		<result column="major" property="major"/>
+		<result column="grade" property="grade"/>
+		
+		<collection property="courses" resultMap="CourseMap"/>
+	</resultMap>
+	
+	<!-- resultMap可以通过继承获取 另一个resultMap的映射 -->
+	<resultMap type="Student" id="StudentMap3" extends="StudentMap">
+		<!-- Student基础信息 通过继承获取 -->	
+			
+		<!-- 嵌套结果映射 -->
+		<collection property="courses" resultMap="CourseMap"/>
+	</resultMap>
+	
+	<!-- 嵌套结果查询 -->
+	<resultMap type="Student" id="StudentMap4" extends="StudentMap">
+		<!-- Student基础信息 通过继承获取 -->	
+			
+		<!-- 嵌套结果映射 -->
+		<collection property="courses" resultMap="CourseMap"/>
+	</resultMap>
+	
+	<!-- 获取学生的信息【包含所选的课程】 -->
+	<select id="getStudentByIdWithCourses" parameterType="int" resultMap="StudentMap3">
+		select s.id,s.name,s.gender,s.grade,s.major,
+			c.id cid,c.course_code,c.course_name
+		from student s,course c,student_course sc
+		where s.id=sc.student_id
+			and c.id=sc.course_id
+			and s.id=#{id}		
+	</select>
+	
+	<!-- 根据课程id，查找所有选课的学生s -->
+	<select id="findAllStudentsByCourseId" parameterType="int" resultMap="StudentMap">
+		select s.id,s.name,s.gender,s.grade,s.major
+		from student_course sc,student s
+		where sc.student_id=s.id
+			and sc.course_id=#{id}
+	</select>
+	
+	<resultMap type="Course" id="CourseMap2" extends="CourseMap">
+		<!-- 课程基本信息 -->
+		
+		<!-- 通过嵌套结果查询 获取 学生对象 -->
+		<collection property="students" column="cid" select="findAllStudentsByCourseId"></collection>
+	</resultMap>
+	
+	<!-- 嵌套结果查询，将指定课程信息输出【包含所选学生】 -->
+	<select id="getCourseByIdWithStudents" parameterType="int" resultMap="CourseMap2">
+		select id cid,course_code,course_name
+		from course
+		where id=#{id}
+	</select>
+	
+	<!-- 【注意】如果有特殊符号的话 需要用 <![CDATA[ 特殊符号 ]]>  例如 < & 等等 -->
+	<select id="getStudentByIdOnCondition" parameterType="int" resultType="Student">
+		select *
+		from student
+		where id <![CDATA[ < ]]> #{id}
+	</select>
+	
+	<!-- <select id="getStudentByIdOnCondition" parameterType="int" resultType="Student">
+		<![CDATA[ 
+			select *
+			from student
+			where id < #{id}
+		]]>
+	</select> -->
+	
+</mapper>
+
+
+
+
+
+
